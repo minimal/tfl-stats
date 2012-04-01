@@ -15,10 +15,10 @@
 
 (deftest test-process-status
   (is (= (process-status status-map)
-         {"0" {:LineStatusId "0", :StatusId "GS", :CssClass "GoodService"}})))
+         {:0 {:LineStatusId "0", :StatusId "GS", :CssClass "GoodService"}})))
 
 
 (deftest test-process-status-disrupted
   (is (= (process-status status-map-disrupted)
-         {"9" {:LineStatusId "9", :StatusId "PC", :CssClass "DisruptedService"}})))
+         {:9 {:LineStatusId "9", :StatusId "PC", :CssClass "DisruptedService"}})))
 

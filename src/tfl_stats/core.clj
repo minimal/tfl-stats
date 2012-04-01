@@ -5,9 +5,6 @@
 (require '[clojure.xml :as xml]
          '[clojure.zip :as zip])
 
-(defn zip-str [s]
-  (zip/xml-zip (xml/parse (java.io.ByteArrayInputStream. (.getBytes s)))))
-;; TODO: look at aleph xmlparsing
 
 (defn now [] (java.util.Date.))
 
@@ -21,23 +18,24 @@
 (defn get-and-parse-line-status []
   (let [res (get-line-status)]
     (if (= 200 (:status res))
-      (-> res :body channel-buffer->string zip-str first :content))))
+      (-> res :body decode-xml first :content))))
 
 
 (defn process-status [status]
   (let [LineStatusId (-> status :attrs :ID)
-                     content (:content status)
-                     status-map (->  (first (filter #(= (:tag %) :Status)
-                                                    content)))]
-    {LineStatusId {:LineStatusId LineStatusId
+        content (:content status)
+        status-map (->  (first (filter #(= (:tag %) :Status)
+                                       content)))]
+    {(keyword LineStatusId) {:LineStatusId LineStatusId
                    :StatusId (-> status-map :attrs :ID)
                    :CssClass (-> status-map :attrs :CssClass)}}))
 
 (defn process-statuses
   [statuses]
   {:date (now) 
-   :statuses (for [status statuses]
-               (process-status status))})
+   :statuses (reduce merge
+                     (for [status statuses]
+                       (process-status status)))})
 
 (defn mk-date-key [date]
   (str (+ 1900 (.getYear date))
