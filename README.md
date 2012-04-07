@@ -1,5 +1,7 @@
 # tfl-stats
 
+[![Build Status](https://secure.travis-ci.org/minimal/tfl-stats.png?branch=master)](http://travis-ci.org/minimal/tfl-stats)
+
 Playing around with tfl feeds using Clojure and Redis
 
 ## Usage
