@@ -18,7 +18,7 @@
 (defn get-and-parse-line-status []
   (let [res (get-line-status)]
     (if (= 200 (:status res))
-      (-> res :body decode-xml first :content))))
+      (-> res :body decode-xml :content))))
 
 
 (defn process-status [status]
@@ -27,8 +27,8 @@
         status-map (->  (first (filter #(= (:tag %) :Status)
                                        content)))]
     {(keyword LineStatusId) {:LineStatusId LineStatusId
-                   :StatusId (-> status-map :attrs :ID)
-                   :CssClass (-> status-map :attrs :CssClass)}}))
+                             :StatusId (-> status-map :attrs :ID)
+                             :CssClass (-> status-map :attrs :CssClass)}}))
 
 (defn process-statuses
   [statuses]

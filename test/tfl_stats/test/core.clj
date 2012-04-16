@@ -1,6 +1,7 @@
 (ns tfl-stats.test.core
   (:use [tfl-stats.core])
-  (:use [clojure.test]))
+  (:use [clojure.test])
+  (:use midje.sweet))
 
 
 ;; Fixtures
@@ -13,12 +14,21 @@
 
 ;; Tests
 
-(deftest test-process-status
-  (is (= (process-status status-map)
-         {:0 {:LineStatusId "0", :StatusId "GS", :CssClass "GoodService"}})))
+;; TODO: test actual url
+
+(let [statuses (get-and-parse-line-status)]
+  (fact "facts about the feed"
+        (-> statuses first :tag) => :LineStatus
+        (-> statuses first :attrs :ID) => truthy
+        (-> statuses first :attrs :StatusDetails) => truthy
+        (-> statuses first :content) => sequential?))
+
+(fact "status is processed correctly"
+      (process-status status-map) =>
+      {:0 {:LineStatusId "0", :StatusId "GS", :CssClass "GoodService"}})
 
 
-(deftest test-process-status-disrupted
-  (is (= (process-status status-map-disrupted)
-         {:9 {:LineStatusId "9", :StatusId "PC", :CssClass "DisruptedService"}})))
+(fact "handle disrutpted status"
+      (process-status status-map-disrupted) =>
+      {:9 {:LineStatusId "9", :StatusId "PC", :CssClass "DisruptedService"}})
 
