@@ -1,12 +1,11 @@
 (ns tfl-stats.core)
 (use 'lamina.core 'aleph.http 'aleph.formats)
 (use 'aleph.redis)
+(use '[clj-time.core :only [date-time now year month day hour minute]])
 
 (require '[clojure.xml :as xml]
          '[clojure.zip :as zip])
 
-
-(defn now [] (java.util.Date.))
 
 (def red (redis-client {:host "localhost"}))
 
@@ -38,11 +37,14 @@
                        (process-status status)))})
 
 (defn mk-date-key [date]
-  (str (+ 1900 (.getYear date))
-       ":" (+ 1 (.getMonth date))
-       ":" (.getDate date)
-       ":" (.getHours date)
-       ":" (.getMinutes date)))
+  (reduce str
+          (interpose
+           ":" 
+           [(year date)
+            (month date)
+            (day date)
+            (hour date)
+            (minute date)])))
 
 (defn store-statuses
   [status-map]

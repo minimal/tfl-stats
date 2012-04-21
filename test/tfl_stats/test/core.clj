@@ -1,7 +1,9 @@
 (ns tfl-stats.test.core
   (:use [tfl-stats.core])
   (:use [clojure.test])
-  (:use midje.sweet))
+  (:use midje.sweet)
+  (:use aleph.formats)
+  (:use [clj-time.core :only [date-time now]]))
 
 
 ;; Fixtures
@@ -14,7 +16,6 @@
 
 ;; Tests
 
-;; TODO: test actual url
 
 (let [statuses (get-and-parse-line-status)]
   (fact "facts about the feed"
@@ -28,7 +29,19 @@
       {:0 {:LineStatusId "0", :StatusId "GS", :CssClass "GoodService"}})
 
 
-(fact "handle disrutpted status"
+(fact "handle disrupted status"
       (process-status status-map-disrupted) =>
       {:9 {:LineStatusId "9", :StatusId "PC", :CssClass "DisruptedService"}})
 
+(let [date (date-time 2012 04 17  12 00)
+      processed-statuses {:date date
+                          :statuses {:0 {:LineStatusId "0",
+                                         :StatusId "GS",
+                                         :CssClass "GoodService"}}}
+      _ (store-statuses processed-statuses)
+      key (str "status:" (mk-date-key date))
+      fetched (red [:get key])]
+  (against-background
+   [(after :facts (red [:del key]))]
+   (fact "Data is stored in redis correctly"
+         (decode-json fetched) => map?)))
